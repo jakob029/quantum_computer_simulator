@@ -74,6 +74,10 @@ class Register:
     def __str__(self):
         return str(self.state)
 
+    def update_state(self, new_state: list, scalar: int):
+        """Given a flat list and scalar value, write over the value."""
+        self.state = vstack(new_state, dtype=complex) * scalar
+
     def exectute_gate(self, gate: Any, qubit: int): #TODO, this is not scalable, full matrix multiplications should not be done.
         """Execute a given gate on the current state.
 
@@ -104,12 +108,14 @@ class Register:
         for index, element in enumerate(self.state):
             if element == 0:
                 continue
-            element_str = element.real[0,0] if np.isclose(element.imag, 0, atol=1e-12) else element
+            element_str = element.real if np.isclose(element.imag, 0, atol=1e-12) else element
+            if isinstance(element_str, matrix):
+                element_str = element_str[0,0]
             ket_string += " + " * bool(ket_string) + f"{element_str}*|{format(index, f'0{self.size}b')}>"
         return ket_string
 
 if __name__ == "__main__":
-    register = Register(15)
+    register = Register(10)
     gate = HadamardGate()
     register.exectute_gate(gate.gate, 7)
     print(register.read_basis_states())
