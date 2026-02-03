@@ -24,10 +24,10 @@ class HadamardGate(AbstractGate):
     """"""
 
     def __init__(self):
-        self.gate = [[1,1],
-                     [1,-1]]
+        scalar = 1/(2**0.5)
+        self.gate = np.matrix([[1,1],
+                     [1,-1]]) * scalar
 
-        self.scalar = 1/(2**0.5) #TODO, integrate scalar.
         self.gate_identifier = "H"
 
     def multi_qubit(self, n: int, qubit_num: int) -> np.ndarray: #TODO, this should probably be initiated from the constructor.
