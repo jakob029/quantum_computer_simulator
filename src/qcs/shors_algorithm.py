@@ -119,6 +119,3 @@ def interactive_shors_algorithm():
     prime_factors = (int(np.gcd(period_calculation - 1, n)), int(np.gcd(period_calculation + 1, n)))
     print(f"The following prime factors were found: {prime_factors}")
     return prime_factors
-
-#if __name__ == "__main__":
-#    interactive_shors_algorithm()
