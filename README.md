@@ -4,9 +4,16 @@ This project is currently under construction, currently existing methods might/d
 
 # Run instructions
 
-Construct a circuit following the format outlined in the [example](examples/example_circuit.py).
+When standing in the root of this repo, run
 
-Use the circuit.generate_picture picture method to generate a visualization of the constructed circuit (example can be found [here](examples/diagram.png)).
+    $ pip install .
+
+## Shor's algorithm
+
+To run Shor's algorithm, run the entrypoint:
+
+    $ shors_algorithm
+
 
 # Gates
 
@@ -53,7 +60,3 @@ $$
 QFT(k) = \frac{1}{\sqrt{N}} \sum_{k = 0}^{N - 1} e^{2 \pi i \frac{jk}{n}} \ket{k}
 \end{align}
 $$
-
-# Backlog
-
- * Change qubit structure to scale with integer values derived from minimum distance h (floating point numbers shall not be used).
