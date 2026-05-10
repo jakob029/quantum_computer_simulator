@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Callable
 
 from numpy import sin, cos, matrix, array, ndarray, vstack, kron
 import numpy as np
@@ -89,6 +89,15 @@ class Register:
         gate_matrix = self.upscale_gate(gate, qubit, self.size)
         self.state = gate_matrix * self.state
 
+    def execute_gate_all_qubits(self, gate: np.matrix):
+        """Execute a gate constructed to be executed on all qubits in the register.
+
+        Args:
+        ----
+            gate: Gate to execute.
+        """
+        self.state = gate * self.state
+
     @staticmethod
     def upscale_gate(gate: matrix, qubit: int, size: int) -> matrix:
         """Execute tensor product between gate matrix and identity matrix to scale, 
@@ -114,8 +123,67 @@ class Register:
             ket_string += " + " * bool(ket_string) + f"{element_str}*|{format(index, f'0{self.size}b')}>"
         return ket_string
 
-if __name__ == "__main__":
-    register = Register(10)
-    gate = HadamardGate()
-    register.exectute_gate(gate.gate, 7)
-    print(register.read_basis_states())
+
+def entangle_registers(register_1: Register ,register_2: Register, seconf_reg_method: Callable):
+    """Entagle two matrixes, where the second matric should start with |0>."""
+    reg_1_len = len(register_1.state)
+    reg_2_len = len(register_2.state)
+
+    if int(register_2.state[0].real) != 1:
+        raise ValueError("The second register does not start with |0>.")
+
+    result = np.zeros(reg_1_len * reg_2_len, dtype=complex)
+
+    for a in range(reg_1_len):
+        amplitude = register_1.state[a]
+        y = seconf_reg_method(a)
+        index = a * reg_2_len + y #Index for amplitude 
+
+        result[index] = amplitude
+
+    return result
+
+def measure_register(register):
+    """Measure single register."""
+    reg_values = np.abs(register.real)
+
+    if np.round(sum(reg_values)) != 1:
+        reg_values = reg_values * 1/sum(reg_values)
+
+    return np.random.choice(len(register), p=reg_values)
+
+def measure_register_2(state, register_1, register_2):
+    """Measure register two, (meaning pick a value using the amplitude as the probability)."""
+    reg_1_len = len(register_1.state)
+    reg_2_len = len(register_2.state)
+
+    state_2d = state.reshape(reg_1_len, reg_2_len)
+    probs = np.sum(np.abs(state_2d)**2, axis=0)
+    probs = probs / probs.sum()
+
+    #Pick one of the elements in register 2 at random, after the prob amplitudes has been set.
+    measured_y = np.random.choice(reg_2_len, p=probs)
+
+    return measured_y
+
+
+def collapse_entangled_regisers(state, register_1, register_2, value):
+    """Collapse entangled registers into one, represented as a matrix scaled reg_1_len x reg_2_len."""
+    reg_1_len = len(register_1.state)
+    reg_2_len = len(register_2.state)
+    state_2d = state.reshape(reg_1_len, reg_2_len)
+    collapsed = np.zeros_like(state_2d)
+    collapsed[:, value] = state_2d[:, value]
+    norm = np.linalg.norm(collapsed)
+
+    if norm > 0:
+        collapsed /= norm
+
+    return collapsed.reshape(reg_1_len, reg_2_len)
+
+def reduce_collapsed_matrix(collapsed_matrix: ndarray, value: int):
+    """After one register in a 2 register intagelment has collapsed, remove all |k>*0 and flatten structure."""
+    result: list = []
+    for row in collapsed_matrix:
+        result.append(float(np.abs(row[value])))
+    return result

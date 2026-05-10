@@ -30,7 +30,7 @@ class HadamardGate(AbstractGate):
 
         self.gate_identifier = "H"
 
-    def multi_qubit(self, n: int, qubit_num: int) -> np.ndarray: #TODO, this should probably be initiated from the constructor.
+    def specific_qubit(self, n: int, qubit_num: int) -> np.ndarray: #TODO, this should probably be initiated from the constructor.
         """Hadamard gate is applied per qubit.
 
         Hadamard gate is applied on the k'th qubit by taking the tensor product with the 2x2 identity matrix n times,
@@ -38,7 +38,7 @@ class HadamardGate(AbstractGate):
 
         Args:
             n: Number of qubits in system
-            qubit_num: Specific qubit number.
+            qubit_num: Specific qubit number (meaning qubit k).
 
         """
         if n == 1:
@@ -52,6 +52,14 @@ class HadamardGate(AbstractGate):
 
         for multiplier in tensor_chain[2:]:
             tensor_product = np.kron(tensor_product, multiplier)
+
+        return tensor_product
+
+    def multi_qubit(self, n: int):
+        """Generate a large matrix which applies hadamards gate to all qubits in an 'n' qubit register."""
+        tensor_product = self.gate
+        for _ in range(n-1):
+            tensor_product = np.kron(tensor_product, self.gate)
 
         return tensor_product
 
@@ -117,3 +125,17 @@ def construct_phase_shift_gate(n):
     scalar_element = np.exp(2 * np.pi * 1j * (hilbert_space_dimensions)**(-1))
 
     return np.matrix([[1,0],[0, scalar_element]])
+
+class ModularExponentiation(AbstractGate):
+
+    def generate__(self):
+        identity_matrix = np.eye(2)
+        base_matrix = [[1,0], [0,0]] # |0><0|
+        reverse_matrix = [[0,0], [0,1]] # |1><1|
+
+def qft(flat_register: str):
+    """Given some register described as a flat array, 
+    execute a quantom forier transformation (using the numpy descrete forier transformation)."""
+    state = np.fft.fft(flat_register)
+    state /= np.sqrt(len(flat_register))
+    return state

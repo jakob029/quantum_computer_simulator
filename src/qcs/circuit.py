@@ -1,7 +1,7 @@
 """"""
 from PIL import Image, ImageDraw, ImageFont
 from examples.example_circuit import QFT_3_qubit_circuit
-from qubit import Qubit, BasisState
+from qubit import Qubit, Register
 import numpy as np
 
 class circuit:
