@@ -19,6 +19,7 @@ To run Shor's algorithm, run the entrypoint:
 
 ## Hadamard gate
 Hadamards gate is applied per qubit, and is defined as:
+
 $$
 \begin{align}
   \frac{1}{\sqrt{2}}
